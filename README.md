@@ -3,8 +3,6 @@
 ## Overview
 An end-to-end data analytics project analyzing ~1.85 million credit card transactions to uncover fraud patterns across time, location, merchant category, and customer demographics. This project follows a complete pipeline from raw data to business intelligence dashboard, using **Excel → Python (Google Colab) → MySQL → Power BI**.
 
-This is a companion project to my [Video Game Sales Analysis project](#) (link to be added), built to demonstrate the same end-to-end analytical workflow applied to a different industry — finance/fraud risk — using a different BI tool (Power BI instead of Tableau).
-
 > **Note:** This dataset is synthetic, generated using a transaction simulator (Sparkov). It was chosen specifically because it mirrors a realistic transaction schema while being safe for public portfolio use with no privacy or licensing concerns.
 
 ## Dataset
