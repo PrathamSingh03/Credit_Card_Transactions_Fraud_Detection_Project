@@ -13,14 +13,14 @@ An end-to-end data analytics project analyzing ~1.85 million credit card transac
 - **Time period:** Transactions spanning 2019 onward
 
 ## Project Status
-🚧 **In progress** — currently at the SQL business analysis stage.
+🚧 **In progress** — currently at the Power BI dashboard stage.
 
 - [x] Excel-level initial exploration
 - [x] Python cleaning & merging (Google Colab)
 - [x] Feature engineering
 - [x] Data validation checks
 - [x] MySQL import & schema setup
-- [ ] SQL business analysis queries
+- [x] SQL business analysis queries
 - [ ] Power BI dashboard
 
 ## Pipeline
@@ -53,7 +53,33 @@ Imported the cleaned dataset (1,852,394 rows) into a relational database (`fraud
 - **Schema refinement:** `trans_date_trans_time` and `dob` were initially loaded as text, then converted to proper `DATETIME`/`DATE` types using `ALTER TABLE ... MODIFY COLUMN`.
 
 ### 4. SQL Business Analysis
-Writing analytical queries to answer real business questions about fraud patterns — see `queries.sql` in this repo. Covers fraud rate by category, time of day, day of week, customer age band, gender, and geography, plus merchant-level fraud concentration.
+Wrote 12 stored procedures answering real business questions about fraud patterns — see `business_questions_queries.sql` in this repo. Each question is implemented as a reusable stored procedure (`sp_...`), callable with `CALL sp_procedure_name();`.
+
+**Questions covered:**
+1. Overall fraud rate
+2. Fraud rate by merchant category
+3. Fraud trend over time (by year and month)
+4. Top 10 merchants by fraud count
+5. Average transaction amount: fraud vs. legitimate
+6. Fraud rate by hour of day
+7. Fraud rate by day of week
+8. Fraud rate by customer age band
+9. Fraud rate by gender
+10. Fraud rate by state
+11. Top 10 cities by fraud count
+12. Fraud rate by day of week × hour combined (for a heatmap visual)
+
+**Key Findings:**
+
+- **Overall fraud rate:** 0.521% (9,651 fraudulent out of 1,852,394 transactions)
+- **Time of day is the strongest signal:** fraud peaks sharply at 22:00 (2.601%) and 23:00 (2.546%) — roughly 15–20x higher than the safest daytime hours
+- **Highest-risk window (day × hour combined):** late night on Wednesday–Saturday, specifically 22:00–23:00 (e.g., Thursday 22:00 at 3.267%)
+- **Category matters:** online/digital categories (`shopping_net` 1.593%, `misc_net` 1.304%) show notably higher fraud rates than routine categories like `home` and `health_fitness` (0.151% each)
+- **Transaction size:** fraudulent transactions average $530.66 vs. $67.65 for legitimate ones — roughly **7.8x higher** — though fraud amounts stay within a bounded range ($1.06–$1,376.04) rather than including extreme outliers
+- **Demographics:** older customers (56+) show nearly double the fraud rate of the lowest-risk age group (36-45); male cardholders show a modestly higher rate than female cardholders (0.567% vs. 0.483%)
+- **Fraud is diffuse, not concentrated:** no single merchant or city dominates fraud volume — the top merchant accounted for only 62 fraud cases out of 6,262 transactions, suggesting fraud risk is systemic rather than localized to specific bad actors
+- **Mild seasonal pattern:** fraud rates were elevated in January–February relative to later months
+- *Note: one state (DE) showed a 100% fraud rate, but this was based on only 9 total transactions — a small-sample statistical outlier, not a meaningful pattern*
 
 ### 5. Power BI
 *(Planned)* Interactive dashboard covering:
@@ -74,7 +100,7 @@ Writing analytical queries to answer real business questions about fraud pattern
 ```
 ├── Credit_Card_Transactions_Fraud_Detection_Project.ipynb   # Python cleaning & feature engineering
 ├── fraud_detection_db.sql                                   # Database schema & import script
-├── queries.sql                                               # Business analysis SQL queries (in progress)
+├── business_questions_queries.sql                            # Business analysis SQL queries (stored procedures)
 ├── README.md
 ```
 
@@ -83,6 +109,7 @@ Writing analytical queries to answer real business questions about fraud pattern
 - Practiced systematic data validation at each pipeline stage (row counts, dtype checks, range checks) rather than assuming a clean transformation succeeded.
 - Learned to diagnose and work around GUI tool limitations at scale (MySQL Workbench's Import Wizard struggling with 1.85M rows) by switching to `LOAD DATA LOCAL INFILE` for a faster, more reliable, and fully type-controlled import.
 - Handled large-table schema changes (`ALTER TABLE ... MODIFY COLUMN` across 1.85M rows) and worked through connection timeout issues by adjusting client settings and testing batched vs. direct approaches.
+- Wrote all business analysis queries as stored procedures for reusability, and debugged real SQL issues along the way — including MySQL's `ONLY_FULL_GROUP_BY` restriction, and a subtle bug where sorting by a `CONCAT()`-formatted percentage string sorted alphabetically instead of numerically (fixed by sorting on the underlying numeric expression instead of the display alias).
 
 ---
 *This README is a living document and will be updated as the project progresses through the MySQL and Power BI stages.*
