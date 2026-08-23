@@ -13,7 +13,7 @@ An end-to-end data analytics project analyzing ~1.85 million credit card transac
 - **Time period:** Transactions spanning 2019 onward
 
 ## Project Status
-🚧 **In progress** — currently at the Power BI dashboard stage.
+✅ **Complete** — all phases finished, dashboard ready.
 
 - [x] Excel-level initial exploration
 - [x] Python cleaning & merging (Google Colab)
@@ -21,7 +21,7 @@ An end-to-end data analytics project analyzing ~1.85 million credit card transac
 - [x] Data validation checks
 - [x] MySQL import & schema setup
 - [x] SQL business analysis queries
-- [ ] Power BI dashboard
+- [x] Power BI dashboard
 
 ## Pipeline
 
@@ -82,12 +82,29 @@ Wrote 12 stored procedures answering real business questions about fraud pattern
 - *Note: one state (DE) showed a 100% fraud rate, but this was based on only 9 total transactions — a small-sample statistical outlier, not a meaningful pattern*
 
 ### 5. Power BI
-*(Planned)* Interactive dashboard covering:
-- Fraud rate KPI overview
-- Fraud rate by merchant category
-- Fraud patterns by hour of day / day of week
-- Geographic distribution of fraud
-- Fraud rate by customer age band
+A 3-page interactive dashboard connected directly to MySQL, built from the SQL business-analysis queries above. Each page tells a distinct part of the fraud story:
+
+**Page 1 — Overview**
+- KPI cards: Total Transactions, Fraud Rate (%), Fraud Count
+- Fraud Rate by Category (top 10)
+- Fraud Rate Trend by Month (2019 vs. 2020)
+- Average Transaction Amount: Fraud vs. Legitimate, with a callout on the amount range difference
+
+**Page 2 — Time Patterns**
+- Fraud Rate by Hour of Day, with a callout highlighting the 10 PM–11 PM peak window
+- Fraud Rate by Day of Week, with Thursday/Friday highlighted as the highest-risk days
+- Fraud Rate Heatmap (Day of Week × Hour) — a color-graded matrix visually confirming the late-night, midweek-to-Friday fraud concentration
+
+**Page 3 — Demographics & Geography**
+- Fraud Rate by Age Band, with the 56+ groups highlighted
+- Fraud Rate by Gender
+- Fraud Rate by State (Shape Map, color-graded), with Delaware excluded due to an insufficient sample size (9 transactions)
+- Top 10 Cities by Fraud Count
+
+**Design notes:**
+- Consistent navy (`#1F3A5F`) / amber (`#E8A33D`) color palette throughout, with amber used to flag elevated-risk categories, days, hours, and age bands
+- Every visual uses matching shadow/border styling for a cohesive look
+- Each page's queries are independent, pre-aggregated SQL results rather than a single shared fact table — this keeps each query fast and simple, but means visuals do not cross-filter each other on click. This was a deliberate trade-off given the project's focus on presenting clear findings rather than ad hoc drill-down exploration.
 
 ## Tech Stack
 - **Excel** — initial data inspection
@@ -101,8 +118,10 @@ Wrote 12 stored procedures answering real business questions about fraud pattern
 ├── Credit_Card_Transactions_Fraud_Detection_Project.ipynb   # Python cleaning & feature engineering
 ├── fraud_detection_db.sql                                   # Database schema & import script
 ├── business_questions_queries.sql                            # Business analysis SQL queries (stored procedures)
+├── dashboard_screenshots/                                    # Static images of each dashboard page
 ├── README.md
 ```
+*Note: the Power BI (`.pbix`) file is not included in this repository due to file size — dashboard screenshots are provided instead. The `.pbix` file is available on request.*
 
 ## Key Learnings
 - Reinforced the importance of explicitly setting data types for identifier columns (IDs, card numbers) rather than relying on auto-detection — both in pandas and in database import tools — to avoid silent precision loss.
@@ -112,4 +131,4 @@ Wrote 12 stored procedures answering real business questions about fraud pattern
 - Wrote all business analysis queries as stored procedures for reusability, and debugged real SQL issues along the way — including MySQL's `ONLY_FULL_GROUP_BY` restriction, and a subtle bug where sorting by a `CONCAT()`-formatted percentage string sorted alphabetically instead of numerically (fixed by sorting on the underlying numeric expression instead of the display alias).
 
 ---
-*This README is a living document and will be updated as the project progresses through the MySQL and Power BI stages.*
+*This project follows the full analytics pipeline from raw data to dashboard, with real data-integrity and tooling issues encountered and resolved along the way — documented above as part of the learning process.*
